@@ -17,12 +17,12 @@ public class BlogParser {
 			
 			try {
 				doc = Jsoup.connect(address).get();
-//				if(doc.select("frame[src]").toString().equals("")) return ""; 
-//				elems = doc.select("frame[src]");
-//				elem = elems.get(0); // id,
-//				src = elem.attr("abs:src");
+				if(doc.select("frame[src]").toString().equals("")) return ""; 
+				elems = doc.select("frame[src]");
+				elem = elems.get(0); // id,
+				src = elem.attr("abs:src");
 				
-//				doc = Jsoup.connect(src).get(); 
+				doc = Jsoup.connect(src).get(); 
 				html_content = doc.select(".post-view.pcol2");
 				if(html_content.isEmpty())
 				{

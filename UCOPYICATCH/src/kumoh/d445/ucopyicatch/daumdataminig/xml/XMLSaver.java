@@ -13,7 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class XMLSaver {
-	public void saveXML(String content, String address, int bookCode, int count)
+	public void saveXML(String content, String address, String bookCode, int count)
 	{
         String fileName = "xml\\2" + bookCode + "_" + count + ".xml";
      

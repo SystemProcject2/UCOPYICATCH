@@ -2,13 +2,20 @@ package kumoh.d445.ucopyicatch.daumdataminig.bookreport;
 
 public class BookItemData {
 	private String title;
-	private int bookCode;
+	private String bookCode;
+	
+	public BookItemData(){}
+	
+	public BookItemData(String bookCode, String title) {
+		this.title = title;
+		this.bookCode = bookCode;
+	}
 	
 	public String getTitle(){
 		return title;
 	}
 	
-	public int getBookCode() {
+	public String getBookCode() {
 		return bookCode;
 	}
 	
@@ -16,7 +23,7 @@ public class BookItemData {
 		this.title = title;
 	}
 	
-	public void setBookCode(int bookCode) {
+	public void setBookCode(String bookCode) {
 		this.bookCode = bookCode;
 	}
 }
