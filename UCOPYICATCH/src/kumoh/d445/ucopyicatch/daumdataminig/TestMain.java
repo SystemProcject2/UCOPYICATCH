@@ -23,7 +23,7 @@ public class TestMain {
 			if(content.length() == 0){
             	continue;
 			}
-//			xs.saveXML(content, address, bData.getBookList().get(0).getBookCode(), count);
+			xs.saveXML(content, address, bData.getBookList().get(0).getBookCode(), count++);
 		}
 	}
 }
