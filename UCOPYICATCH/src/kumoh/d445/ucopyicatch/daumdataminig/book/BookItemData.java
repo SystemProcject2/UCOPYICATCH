@@ -1,4 +1,4 @@
-package kumoh.d445.ucopyicatch.daumdataminig.bookreport;
+package kumoh.d445.ucopyicatch.daumdataminig.book;
 
 public class BookItemData {
 	private String title;

@@ -1,7 +1,7 @@
 package kumoh.d445.ucopyicatch.daumdataminig;
 
-import kumoh.d445.ucopyicatch.daumdataminig.bookreport.BookData;
-import kumoh.d445.ucopyicatch.daumdataminig.bookreport.BookFile;
+import kumoh.d445.ucopyicatch.daumdataminig.book.BookData;
+import kumoh.d445.ucopyicatch.daumdataminig.book.BookFile;
 import kumoh.d445.ucopyicatch.daumdataminig.parse.BlogParser;
 import kumoh.d445.ucopyicatch.daumdataminig.response.BlogData;
 import kumoh.d445.ucopyicatch.daumdataminig.xml.XMLSaver;
