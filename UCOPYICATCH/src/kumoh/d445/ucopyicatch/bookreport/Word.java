@@ -37,8 +37,6 @@ public class Word {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (Float.floatToIntBits(tfidf) != Float.floatToIntBits(other.tfidf))
-			return false;
 		return true;
 	}
 

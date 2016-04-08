@@ -4,21 +4,12 @@ import java.util.ArrayList;
 
 public class BookReportItemData {
 
-	private ArrayList<ArrayList<Word>> contents;
-	private ArrayList<String> sentence;
-	private ArrayList<ArrayList<String>> nouns;
+	private ArrayList<ArrayList<Word>> noun = new ArrayList<ArrayList<Word>>();
+	private ArrayList<String> sentence = new ArrayList<String>();
 	private String link;
 	private String title;
 	private String content;
 	private int bookcode;
-
-	public ArrayList<ArrayList<String>> getNouns() {
-		return nouns;
-	}
-
-	public void setNouns(ArrayList<ArrayList<String>> nouns) {
-		this.nouns = nouns;
-	}
 
 	public int getBookcode() {
 		return bookcode;
@@ -37,10 +28,10 @@ public class BookReportItemData {
 	}
 
 	public ArrayList<ArrayList<Word>> getContents() {
-		return contents;
+		return noun;
 	}
-	public void setContents(ArrayList<ArrayList<Word>> contents) {
-		this.contents = contents;
+	public void setContents(ArrayList<ArrayList<Word>> noun) {
+		this.noun = noun;
 	}
 	public ArrayList<String> getSentence() {
 		return sentence;
