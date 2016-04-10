@@ -2,27 +2,67 @@ package kumoh.d445.ucopyicatch.bookreport;
 
 public class Word {
 	private String name;
-	private float tfidf;
+	private double tfidf;
+	private int tf;
+	private int df;
+	private int total;
+	
+	public Word() {
+		
+	}
+	
+	public Word(String name) {
+		this.name = name;
+	}
+	
 	public String getName() {
 		return name;
 	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
-	public float getTfidf() {
-		return tfidf;
-	}
-	public void setTfidf(float tfidf) {
+	
+	public void setTfidf(double tfidf) {
 		this.tfidf = tfidf;
 	}
+	
+	public double getTfidf() {
+		return tfidf;
+	}
+	
+	public int getTF() {
+		return tf;
+	}
+	
+	public void setTF(int tf) {
+		this.tf = tf;
+	}
+	
+	public int getDF() {
+		return df;
+	}
+	
+	public void setDF(int df) {
+		this.df = df;
+	}
+	
+	public int getTotal() {
+		return total;
+	}
+	
+	public void setTotal(int total) {
+		this.total = total;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + Float.floatToIntBits(tfidf);
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -39,6 +79,5 @@ public class Word {
 			return false;
 		return true;
 	}
-
-
+	
 }

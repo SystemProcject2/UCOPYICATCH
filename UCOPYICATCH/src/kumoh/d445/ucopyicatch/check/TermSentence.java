@@ -60,18 +60,6 @@ public class TermSentence {
 		}
 	}
 	
-	public void calcTF() {
-		
-	}
-	
-	public void calcDF() {
-		
-	}
-	
-	public void calcTFIDF() {
-		
-	}
-	
 	public void calcSVD() {
 		//인덱스순으로 0 : U, 1 : V, 2 : S
 		Matrix svd[] = matrix.svd();
