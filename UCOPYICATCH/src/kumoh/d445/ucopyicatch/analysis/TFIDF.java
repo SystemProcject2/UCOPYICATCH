@@ -10,12 +10,12 @@ public class TFIDF {
 	static HashMap<String, Integer> dfList = new HashMap<String, Integer>();
 	
 	public static double tfIdf(int tf, int df, int total) {
-		double result = tf*Math.log10(total/df);
+		double result = tf*Math.log10((double)total/df);
 		return result;
 	}
 	
-	public static void accureDF(HashMap<String, Integer> tfList) {
-		Set<Entry<String, Integer>> set = tfList.entrySet();
+	public static void accureDF(HashMap<String, Integer> list) {
+		Set<Entry<String, Integer>> set = list.entrySet();
 		Iterator<Entry<String, Integer>> it = set.iterator();
 		while(it.hasNext()) {
 			Map.Entry<String, Integer> e = (Map.Entry<String, Integer>)it.next();
@@ -30,6 +30,11 @@ public class TFIDF {
 			else
 				dfList.put(noun, 1);
 		}
+	}
+	
+	public static HashMap<String, Integer> getDfList()
+	{
+		return dfList;
 	}
 	
 	public static void clearDF() {

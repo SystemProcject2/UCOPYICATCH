@@ -1,11 +1,46 @@
 package kumoh.d445.ucopyicatch.bookreport;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import kumoh.d445.ucopyicatch.analysis.TFIDF;
 
 public class BookReportData {
 
-	private ArrayList<BookReportItemData> items;
+	private ArrayList<BookReportItemData> items = new ArrayList<BookReportItemData>();
 
+	public void setDF(HashMap<String, Integer> dfList) {
+		for(int i=0 ; i < items.size() ; i++) {
+			for(int j=0 ; j < items.get(i).getContents().size() ; j++) {
+				for(int k=0 ; k < items.get(i).getContents().get(j).size() ; k++) {
+					String name = items.get(i).getContents().get(j).get(k).getName();
+					int count = dfList.get(name);
+					if(i==0) {
+						items.get(i).getContents().get(j).get(k).setDF(count);
+					}
+					else {
+						items.get(i).getContents().get(j).get(k).setDF(++count);
+					}
+					items.get(i).getContents().get(j).get(k).setTotal(items.size());
+				}
+			}
+		}
+	}
+	
+	public void setTfIdf() {
+		for(int i=0 ; i < items.size() ; i++) {
+			for(int j=0 ; j < items.get(i).getContents().size() ; j++) {
+				for(int k=0 ; k < items.get(i).getContents().get(j).size() ; k++) {
+					int tf = items.get(i).getContents().get(j).get(k).getTF();
+					int df = items.get(i).getContents().get(j).get(k).getDF();
+					int total = items.get(i).getContents().get(j).get(k).getTotal();
+					//System.out.println(TFIDF.tfIdf(tf, df, total));
+					items.get(i).getContents().get(j).get(k).setTfidf(TFIDF.tfIdf(tf, df, total));
+				}
+			}
+		}
+	}
+	
 	public String toString()
 	{
 		String result = "";

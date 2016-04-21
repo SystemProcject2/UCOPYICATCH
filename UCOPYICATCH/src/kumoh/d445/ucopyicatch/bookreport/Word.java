@@ -15,6 +15,11 @@ public class Word {
 		this.name = name;
 	}
 	
+	public Word(String name, int tf) {
+		this.name = name;
+		this.tf = tf;
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -78,6 +83,11 @@ public class Word {
 		} else if (!name.equals(other.name))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Word [name=" + name + ", tfidf=" + tfidf + ", tf=" + tf + ", df=" + df + ", total=" + total + "]";
 	}
 	
 }

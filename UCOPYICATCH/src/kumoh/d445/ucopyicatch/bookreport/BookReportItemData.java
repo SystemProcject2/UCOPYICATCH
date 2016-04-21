@@ -10,6 +10,17 @@ public class BookReportItemData {
 	private String title;
 	private String content;
 	private int bookcode;
+	
+	public BookReportItemData() {
+		
+	}
+	
+	public BookReportItemData(int bookcode, String title, String link, String text) {
+		this.bookcode=bookcode;
+		this.title=title;
+		this.link=link;
+		this.content=text;
+	}
 
 	public int getBookcode() {
 		return bookcode;
@@ -52,5 +63,11 @@ public class BookReportItemData {
 		this.title = title;
 	}
 
+	@Override
+	public String toString() {
+		return "BookReportItemData [link=" + link + ", title=" + title + ", content=" + content + ", bookcode="
+				+ bookcode + "]";
+	}
+	
 
 }

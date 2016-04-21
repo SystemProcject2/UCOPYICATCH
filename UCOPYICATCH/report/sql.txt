@@ -1,0 +1,9 @@
+select b.code, b.title, b.link, b.text, s.sentence, tf.noun, tf.nounTF from book b, booksentence s, booknountf tf where b.code='10015' and b.bookid=s.bookid and s.sentenceid=tf.sentenceid;
+
+select code, title, link, text, sentence, noun, nounTF from book natural join booksentence natural join booknountf where code='10015';
+
+select bookid, sentenceid, nounid, noun nountf from booksentence natural join booknountf where bookid in (select bookid from book where code='10015');
+
+
+
+select sentence, noun, nountf from booksentence natural join booknountf where sentenceid in (select sentenceid from booksentence where bookid='');

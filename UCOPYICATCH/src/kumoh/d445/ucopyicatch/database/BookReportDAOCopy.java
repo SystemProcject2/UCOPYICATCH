@@ -7,16 +7,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import kumoh.d445.ucopyicatch.analysis.TFIDF;
 import kumoh.d445.ucopyicatch.bookreport.BookReportData;
 import kumoh.d445.ucopyicatch.bookreport.BookReportItemData;
 import kumoh.d445.ucopyicatch.bookreport.Word;
 
-import java.util.Map.Entry;
-
-
-public class BookReportDAO {
+public class BookReportDAOCopy {
 	private static final String JDBC_DRIVER = "org.gjt.mm.mysql.Driver";
 	private static final String JDBC_URL = "jdbc:mysql://202.31.202.199:3306/ucopyicatch";
 	private static final String USER = "root";
@@ -24,10 +22,9 @@ public class BookReportDAO {
 	
 	private Connection con = null;
 	
-	public BookReportDAO() {
+	public BookReportDAOCopy() {
 		try {
 			Class.forName(JDBC_DRIVER);
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}		
@@ -55,59 +52,6 @@ public class BookReportDAO {
 		return true;
 	}
 	
-	public void insertBookReportData(BookReportData brd)
-	{
-		connect();
-		
-		//모든 책 삽입
-		for(int i=0; i< brd.getItems().size(); i++)
-		{
-//			System.out.println(brd.getItems().get(i).getLink());
-			insertBook(brd.getItems().get(i).getBookcode(), brd.getItems().get(i).getTitle(),brd.getItems().get(i).getLink(), brd.getItems().get(i).getContent());
-		}
-		//sentence 삽입
-		ArrayList<Book> bookList = selectBook(brd.getItems().get(0).getBookcode());
-		for(int i=0; i< bookList.size(); i++)
-		{
-			Book book = bookList.get(i);
-			ArrayList<String> sentenceList = brd.getItems().get(i).getSentence();
-			
-			for(int j=0; j<sentenceList.size(); j++)
-			{
-		//		System.out.println(sentenceList.get(j));
-				insertBookSentece(book.getBookid(), sentenceList.get(j)); 
-			}
-		}
-		//Noun 삽입
-		for(int i=0; i<bookList.size(); i++)
-		{
-			Book book = bookList.get(i);
-			ArrayList<BookSentence> sentenceList = selectBookSentence(book.getBookid());
-			for(int j=0; j< sentenceList.size(); j++)
-			{
-				BookSentence bs = sentenceList.get(j);
-				ArrayList<Word> nouns = brd.getItems().get(i).getContents().get(j);
-				
-				for(int k=0; k<nouns.size(); k++)
-				{
-					insertBookNounTf(book.getBookid(), bs.getSentenceid(), nouns.get(k).getName(),nouns.get(k).getTF());
-				}
-			}
-		}
-		
-		Set<Entry<String, Integer>> set = TFIDF.getDfList().entrySet();
-		Iterator<Entry<String, Integer>> it = set.iterator();
-		
-		 while(it.hasNext())
-		 {
-			 Map.Entry<String, Integer> e = (Map.Entry<String, Integer>)it.next();
-			 insertBookNounDf(e.getValue(), e.getKey(),brd.getItems().get(0).getBookcode());
-		 }
-		
-		disconnect();
-
-	}
-	
 	public BookReportData getBook(int code) {
 		connect();
 		BookReportData data = new BookReportData();
@@ -116,9 +60,8 @@ public class BookReportDAO {
 			String bookSql = "select * from book where code='"+code+"';";
 			stmt = con.createStatement();
 			ResultSet BookRs = stmt.executeQuery(bookSql);
-			int count=0;
+			
 			while(BookRs.next()) {
-				//System.out.println("book : "+count++);
 				BookReportItemData item = setBookReportItemData(BookRs);
 				data.getItems().add(item);
 			}
@@ -136,45 +79,24 @@ public class BookReportDAO {
 		BookReportItemData item = new BookReportItemData();
 		Statement stmt = null;
 		try {
-			int bookid = rs.getInt("bookid");
-			int bookCode = rs.getInt("code");
-			String title = rs.getString("title");
-			String link = rs.getString("link");
-			String text = rs.getString("text");
+			int bookid = rs.getInt(0);
+			int bookCode = rs.getInt(1);
+			String title = rs.getString(2);
+			String link = rs.getString(3);
+			String text = rs.getString(4);
 			//sentence 다시 검색
-			String sentenceSql = "select sentence from booksentence where bookid='"+bookid+"';";
-			
-			//booksentence 와 booknountf 조인
-			String joinSql = "select sentenceid, noun, nountf from booknountf where bookid='"+bookid+"';";
-			
+			String sentenceSql = "select * from booksentence where bookid='"+bookid+"';";
 			stmt = con.createStatement();
 			ResultSet sentenceRs = stmt.executeQuery(sentenceSql);
-			
 			while(sentenceRs.next()) {
 				item.setBookcode(bookCode);
 				item.setTitle(title);
 				item.setContent(text);
 				item.setLink(link);
-				item.getSentence().add(sentenceRs.getString("sentence"));
+				item.getSentence().add(sentenceRs.getString(2));
+				item.getContents().add(setWord(sentenceRs,bookCode));
 			}
 			sentenceRs.close();
-			ResultSet joinRs = stmt.executeQuery(joinSql);
-			while(joinRs.next()) {
-				ArrayList<Word> wlist = new ArrayList<Word>();
-				wlist.add(new Word(joinRs.getString("noun"),joinRs.getInt("nountf")));
-				int preid = joinRs.getInt("sentenceid");
-				while(joinRs.next()) {
-					int id = joinRs.getInt("sentenceid");
-					wlist.add(new Word(joinRs.getString("noun"),joinRs.getInt("nountf")));
-					if(preid != id) {
-						break;
-					}
-					preid = id;
-				}
-				item.getContents().add(wlist);
-				//item.getContents().add(setWord(sentenceRs,bookCode));
-			}
-			joinRs.close();
 			stmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -186,19 +108,19 @@ public class BookReportDAO {
 		ArrayList<Word> word = new ArrayList<Word>();
 		Statement stmt = null;
 		try {
-			int sentenceid = rs.getInt("sentenceid");
-			int bookid = rs.getInt("bookid");
+			int sentenceid = rs.getInt(0);
+			int bookid = rs.getInt(1);
 			//word 다시 검색
 			String wordSql = "select * from booknountf where bookid='"+bookid+"' and sentenceid='"+sentenceid+"';";
 			stmt = con.createStatement();
 			ResultSet wordRs = stmt.executeQuery(wordSql);
-			int count =0;
 			while(wordRs.next()) {
-				//System.out.println("word : "+count++);
 				Word item = new Word();
-				item.setName(wordRs.getString("noun"));
-				item.setTF(wordRs.getInt("nounTF"));
+				item.setName(wordRs.getString(2));
+				item.setTF(wordRs.getInt(4));
+				item.setDF(selectBookNounDf(bookcode,wordRs.getString(2)).getNoundf());
 				item.setTotal(selectBookCount(bookcode));
+				item.setTfidf(TFIDF.tfIdf(item.getTF(), item.getDF(), item.getTotal()));
 				word.add(item);
 			}
 			wordRs.close();
@@ -217,33 +139,27 @@ public class BookReportDAO {
 			stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(totalSql);
 			rs.next();
-			total = rs.getInt("count(*)");
+			total = rs.getInt(1);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return total;
 	}
 	
-/*	public boolean insertBookList(BookReportData bookreport) {
+	public boolean insertBook(int bookcode,String title, String link, String text) {
 		connect();
 		Statement stmt = null;
 		try {
 			stmt = con.createStatement();
-			ArrayList<BookReportItemData> bookreportList = bookreport.getItems();
-			for(int i=0; i< bookreportList.size(); i++)
-			{
-				
-				BookReportItemData brid = bookreportList.get(i);
-				StringBuffer sql = new StringBuffer();
-				sql.append("insert into Book(code,title,link,text) values(");
-				sql.append("'"+brid.getBookcode()+"',");
-				sql.append("'"+brid.getTitle()+"',");
-				sql.append("'"+brid.getLink()+"',");
-				sql.append("'"+brid.getContent().replace("\'", "\''").replace("\"", "\\\"") + "'");
-				sql.append(");");
-				System.out.println(sql);
-				stmt.executeUpdate(sql.toString());
-			}
+			StringBuffer sql = new StringBuffer();
+			sql.append("insert into Book(code,title,link,text) values(");
+			sql.append("`"+bookcode+"`,");
+			sql.append("`"+title+"`,");
+			sql.append("`"+link+"`,");
+			sql.append("`"+text+"`");
+			sql.append(");");
+			System.out.println(sql.toString());
+			stmt.executeUpdate(sql.toString());
 			stmt.close();
 		} catch(SQLException e) {
 			e.printStackTrace();
@@ -253,41 +169,16 @@ public class BookReportDAO {
 		}
 		return true;
 	}
-	*/
-	
-	public boolean insertBook(int bookcode,String title, String link, String text) {
-	//	connect();
-		Statement stmt = null;
-		try {
-			stmt = con.createStatement();
-			StringBuffer sql = new StringBuffer();
-			sql.append("insert into Book(code,title,link,text) values(");
-			sql.append("'"+bookcode+"',");
-			sql.append("'"+title+"',");
-			sql.append("'"+link+"',");
-			sql.append("'"+text.replace("\'", "\''").replace("\"", "\\\"")+"'");
-			sql.append(");");
-			
-			stmt.executeUpdate(sql.toString());
-			stmt.close();
-		} catch(SQLException e) {
-			e.printStackTrace();
-			return false;
-		} finally {
-	//		disconnect();
-		}
-		return true;
-	}
 	
 	public boolean insertBookSentece(int bookid, String sentence) {
-	//	connect();
+		connect();
 		Statement stmt = null;
 		try {
 			stmt = con.createStatement();
 			StringBuffer sql = new StringBuffer();
-			sql.append("insert into BookSentence(bookid,sentence) values(");
+			sql.append("insert into BookSentence('bookid','sentence') values(");
 			sql.append("'"+bookid+"',");
-			sql.append("'"+sentence.replace("\'", "\''").replace("\"", "\\\"")+"'");
+			sql.append("'"+sentence+"'");
 			sql.append(");");
 			stmt.executeUpdate(sql.toString());
 			stmt.close();
@@ -295,21 +186,21 @@ public class BookReportDAO {
 			e.printStackTrace();
 			return false;
 		} finally {
-		//	disconnect();
+			disconnect();
 		}
 		return true;
 	}
 	
 	public boolean insertBookNounTf(int bookid, int sentenceid, String noun, int nounTF) {
-	//	connect();
+		connect();
 		Statement stmt = null;
 		try {
 			stmt = con.createStatement();
 			StringBuffer sql = new StringBuffer();
-			sql.append("insert into BookNounTf(bookid,sentenceid, noun,nounTF) values(");
+			sql.append("insert into BookNounTf('bookid','sentenceid','noun','nounTF') values(");
 			sql.append("'"+bookid+"',");
 			sql.append("'"+sentenceid+"',");
-			sql.append("'"+noun.replace("\'", "\''").replace("\"", "\\\"")+"',");
+			sql.append("'"+noun+"',");
 			sql.append("'"+nounTF+"'");
 			sql.append(");");
 			stmt.executeUpdate(sql.toString());
@@ -318,20 +209,20 @@ public class BookReportDAO {
 			e.printStackTrace();
 			return false;
 		} finally {
-	//		disconnect();
+			disconnect();
 		}
 		return true;
 	}
 	
 	public boolean insertBookNounDf(int noundf, String noun, int bookcode) {
-	//	connect();
+		connect();
 		Statement stmt = null;
 		try {
 			stmt = con.createStatement();
 			StringBuffer sql = new StringBuffer();
-			sql.append("insert into BookNounDf(noundf,noun,code) values(");
+			sql.append("insert into BookNounDf('noundf','noun','code') values(");
 			sql.append("'"+noundf+"',");
-			sql.append("'"+noun.replace("\'", "\''").replace("\"", "\\\"")+"',");
+			sql.append("'"+noun+"',");
 			sql.append("'"+bookcode+"'");
 			sql.append(");");
 			stmt.executeUpdate(sql.toString());
@@ -340,13 +231,13 @@ public class BookReportDAO {
 			e.printStackTrace();
 			return false;
 		} finally {
-//			disconnect();
+			disconnect();
 		}
 		return true;
 	}
 	
 	public ArrayList<Book> selectBook(int bookcode) {
-	//	connect();
+		connect();
 		ArrayList<Book> bookData = new ArrayList<Book>();
 		Statement stmt = null;
 		try {
@@ -355,11 +246,11 @@ public class BookReportDAO {
 			ResultSet rs = stmt.executeQuery(sql);
 			while(rs.next()) {
 				Book data = new Book();
-				data.setBookid(rs.getInt("bookid"));
-				data.setBookcode(rs.getInt("code"));
-				data.setTitle(rs.getString("title"));
-				data.setLink(rs.getString("link"));
-				data.setText(rs.getString("text"));
+				data.setBookid(rs.getInt(0));
+				data.setBookcode(rs.getInt(1));
+				data.setTitle(rs.getString(2));
+				data.setLink(rs.getString(3));
+				data.setText(rs.getString(4));
 				bookData.add(data);
 			}
 			rs.close();
@@ -367,13 +258,13 @@ public class BookReportDAO {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		} finally {
-	//		disconnect();
+			disconnect();
 		}
 		return bookData;
 	}
 	
 	public ArrayList<BookSentence> selectBookSentence(int bookid) {
-	//	connect();
+		connect();
 		ArrayList<BookSentence> bookSentence = new ArrayList<BookSentence>();
 		Statement stmt = null;
 		try {
@@ -382,9 +273,9 @@ public class BookReportDAO {
 			ResultSet rs = stmt.executeQuery(sql);
 			while(rs.next()) {
 				BookSentence data = new BookSentence();
-				data.setSentenceid(rs.getInt("sentenceid"));
-				data.setBookid(rs.getInt("bookid"));
-				data.setSentence(rs.getString("sentence"));
+				data.setSentenceid(rs.getInt(0));
+				data.setBookid(rs.getInt(1));
+				data.setSentence(rs.getString(2));
 				bookSentence.add(data);
 			}
 			rs.close();
@@ -392,13 +283,13 @@ public class BookReportDAO {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		} finally {
-	//		disconnect();
+			disconnect();
 		}
 		return bookSentence;
 	}
 	
 	public ArrayList<BookNounTf> selectBookNounTf(int bookid, int sentenceid) {
-	//	connect();
+		connect();
 		ArrayList<BookNounTf> bookNounTf = new ArrayList<BookNounTf>();
 		Statement stmt = null;
 		try {
@@ -407,10 +298,10 @@ public class BookReportDAO {
 			ResultSet rs = stmt.executeQuery(sql);
 			while(rs.next()) {
 				BookNounTf data = new BookNounTf();
-				data.setBookid(rs.getInt("bookid"));
-				data.setSentenceid(rs.getInt("sentenceid"));
-				data.setNoun(rs.getString("noun"));
-				data.setNounTF(rs.getInt("nounTF"));
+				data.setBookid(rs.getInt(0));
+				data.setSentenceid(rs.getInt(1));
+				data.setNoun(rs.getString(2));
+				data.setNounTF(rs.getInt(3));
 				bookNounTf.add(data);
 			}
 			rs.close();
@@ -418,13 +309,13 @@ public class BookReportDAO {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		} finally {
-	//		disconnect();
+			disconnect();
 		}
 		return bookNounTf;
 	}
 	
 	public BookNounDf selectBookNounDf(int bookcode, String noun) {
-	//	connect();
+		connect();
 		BookNounDf bookNounDf = new BookNounDf();
 		Statement stmt = null;
 		try {
@@ -432,16 +323,16 @@ public class BookReportDAO {
 			String sql = "select * from bookNounDf where code='"+bookcode+"'and noun='"+noun+"';";
 			ResultSet rs = stmt.executeQuery(sql);
 			rs.next();
-			bookNounDf.setNounid(rs.getInt("nounid"));
-			bookNounDf.setNoundf(rs.getInt("noundf"));
-			bookNounDf.setNoun(rs.getString("noun"));
-			bookNounDf.setBookcode(rs.getInt("code"));
+			bookNounDf.setNounid(rs.getInt(0));
+			bookNounDf.setNoundf(rs.getInt(1));
+			bookNounDf.setNoun(rs.getString(2));
+			bookNounDf.setBookcode(rs.getInt(3));
 			rs.close();
 			stmt.close();
 		} catch(SQLException e) {
 			e.printStackTrace();
 		} finally {
-	//		disconnect();
+			disconnect();
 		}
 		return bookNounDf;
 	}
@@ -466,4 +357,28 @@ public class BookReportDAO {
 		}
 		return list;
 	}
+	
+	public boolean insertReport(String title, int bookcode, String text) {
+		connect();
+		Statement stmt = null;
+		try {
+			stmt = con.createStatement();
+			StringBuffer sql = new StringBuffer();
+			sql.append("insert into Report(title,code,text,opcheck) values(");
+			sql.append("'"+title+"',");
+			sql.append("'"+bookcode+"',");
+			sql.append("'"+text+"'");
+			sql.append(");");
+			stmt.executeUpdate(sql.toString());
+			stmt.close();
+		} catch(SQLException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			disconnect();
+		}
+		return true;
+	}
+	
+	
 }

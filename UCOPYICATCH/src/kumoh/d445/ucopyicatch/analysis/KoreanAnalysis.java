@@ -15,7 +15,7 @@ import org.snu.ids.ha.ma.Sentence;
 
 import kumoh.d445.ucopyicatch.bookreport.BookReportItemData;
 import kumoh.d445.ucopyicatch.bookreport.Word;
-import kumoh.d445.ucopyicatch.database.BookReportDAO;
+import kumoh.d445.ucopyicatch.database.BookReportDAOCopy;
 
 public class KoreanAnalysis {
 	
@@ -67,7 +67,7 @@ public class KoreanAnalysis {
 		try 
 		{
 			for(int i=0 ; i < sentences.size() ; i++) {
-				sentenceList.add(sentences.get(i).toString());
+				sentenceList.add(((Sentence)sentences.get(i)).getSentence());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();;
