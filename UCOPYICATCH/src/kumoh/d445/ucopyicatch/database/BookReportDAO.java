@@ -116,9 +116,7 @@ public class BookReportDAO {
 			String bookSql = "select * from book where code='"+code+"';";
 			stmt = con.createStatement();
 			ResultSet BookRs = stmt.executeQuery(bookSql);
-			int count=0;
 			while(BookRs.next()) {
-				//System.out.println("book : "+count++);
 				BookReportItemData item = setBookReportItemData(BookRs);
 				data.getItems().add(item);
 			}
@@ -130,6 +128,79 @@ public class BookReportDAO {
 			disconnect();
 		}
 		return data;
+	}
+	
+	//테스트용으로 지울것
+	public BookReportData getSeperate(int code) {
+		connect();
+		BookReportData data = new BookReportData();
+		Statement stmt = null;
+		try {
+			String bookSql = "select * from book where code='"+code+"';";
+			stmt = con.createStatement();
+			ResultSet BookRs = stmt.executeQuery(bookSql);
+			while(BookRs.next()) {
+				BookReportItemData item = setSeperate(BookRs);
+				data.getItems().add(item);
+			}
+			BookRs.close();
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			disconnect();
+		}
+		return data;
+	}
+	
+	//테스트용으로 지울것
+	private BookReportItemData setSeperate(ResultSet rs) {
+		BookReportItemData item = new BookReportItemData();
+		Statement stmt = null;
+		try {
+			int bookid = rs.getInt("bookid");
+			int bookCode = rs.getInt("code");
+			String title = rs.getString("title");
+			String link = rs.getString("link");
+			String text = rs.getString("text");
+			//sentence 다시 검색
+			String sentenceSql = "select sentence from booksentence where bookid='"+bookid+"';";
+			
+			//booksentence 와 booknountf 조인
+			String joinSql = "select sentenceid, separate, tf from separate where bookid='"+bookid+"';";
+			
+			stmt = con.createStatement();
+			ResultSet sentenceRs = stmt.executeQuery(sentenceSql);
+			
+			while(sentenceRs.next()) {
+				item.setBookcode(bookCode);
+				item.setTitle(title);
+				item.setContent(text);
+				item.setLink(link);
+				item.getSentence().add(sentenceRs.getString("sentence"));
+			}
+			sentenceRs.close();
+			ResultSet joinRs = stmt.executeQuery(joinSql);
+			while(joinRs.next()) {
+				ArrayList<Word> wlist = new ArrayList<Word>();
+				wlist.add(new Word(joinRs.getString("separate"),joinRs.getInt("tf")));
+				int preid = joinRs.getInt("sentenceid");
+				while(joinRs.next()) {
+					int id = joinRs.getInt("sentenceid");
+					wlist.add(new Word(joinRs.getString("separate"),joinRs.getInt("tf")));
+					if(preid != id) {
+						break;
+					}
+					preid = id;
+				}
+				item.getContents().add(wlist);
+			}
+			joinRs.close();
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return item;
 	}
 	
 	private BookReportItemData setBookReportItemData(ResultSet rs) {

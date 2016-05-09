@@ -6,6 +6,7 @@ public class SuspendPlagiarismResultItemData {
 	private int compareDoc;	//비교 대상 독후감 인덱스
 	private int compareDocSentenceIndex;	//비교 대상 독후감의 문장 인덱스
 	private String compareDocSentence;
+	private String compareDocLink;
 	private double plagiarismRate;	//해당 문장의 검사 결과값
 	
 	public SuspendPlagiarismResultItemData(int partOfOriginalDocIndex,int compareDoc,int compareDocSentenceIndex,double plagiarismRate) {
@@ -62,12 +63,20 @@ public class SuspendPlagiarismResultItemData {
 	public void setPlagiarismRate(double plagiarismRate) {
 		this.plagiarismRate = plagiarismRate;
 	}
+	
+	public String getCompareDocLink() {
+		return compareDocLink;
+	}
+
+	public void setCompareDocLink(String compareDocLink) {
+		this.compareDocLink = compareDocLink;
+	}
 
 	@Override
 	public String toString() {
 		return "Data [검사문장번호=" + partOfOriginalDocIndex
 				+ ", 검사문장=" + partOfOriginalDocSentence + ", 비교문서번호=" + compareDoc
 				+ ", 비교문서 문장번호=" + compareDocSentenceIndex + ", 비교문서 문장=" + compareDocSentence
-				+ ", Rate=" + plagiarismRate + "]";
+				+ ", 비교문서 주소=" + compareDocLink + ", Rate=" + plagiarismRate + "]";
 	}
 }

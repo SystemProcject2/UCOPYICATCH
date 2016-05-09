@@ -34,8 +34,29 @@ public class BookReportData {
 					int tf = items.get(i).getContents().get(j).get(k).getTF();
 					int df = items.get(i).getContents().get(j).get(k).getDF();
 					int total = items.get(i).getContents().get(j).get(k).getTotal();
-					//System.out.println(TFIDF.tfIdf(tf, df, total));
 					items.get(i).getContents().get(j).get(k).setTfidf(TFIDF.tfIdf(tf, df, total));
+				}
+			}
+		}
+	}
+	
+	public void setFrequency() {
+		for(int i=0 ; i < items.size() ; i++) {
+			for(int j=0 ; j < items.get(i).getContents().size() ; j++) {
+				for(int k=0 ; k < items.get(i).getContents().get(j).size() ; k++) {
+					int tf = items.get(i).getContents().get(j).get(k).getTF();
+					items.get(i).getContents().get(j).get(k).setTfidf(tf);
+				}
+			}
+		}
+	}
+	
+	public void setBoolean() {
+		for(int i=0 ; i < items.size() ; i++) {
+			for(int j=0 ; j < items.get(i).getContents().size() ; j++) {
+				for(int k=0 ; k < items.get(i).getContents().get(j).size() ; k++) {
+					int tf = items.get(i).getContents().get(j).get(k).getTF();
+					items.get(i).getContents().get(j).get(k).setTfidf(1);
 				}
 			}
 		}

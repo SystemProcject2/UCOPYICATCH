@@ -32,12 +32,13 @@ public class CopyCheck {
 			for(int j=originalDocSentence ; j < vector.size() ; j++) {
 				double rate = vector.get(i).cosineSimilarityTo(vector.get(j), true);
 				//표절의심문서에 저장
-				//if(rate > 0) {
+				if(rate > 0.7) {
 					SuspendPlagiarismResultItemData data = new SuspendPlagiarismResultItemData(i,currentCompareDoc,count,rate);
 					data.setPartOfOriginalDocSentence(inform.getSentenceIndex().get(0).get(i));
 					data.setCompareDocSentence(inform.getSentenceIndex().get(currentCompareDoc).get(count));
+					data.setCompareDocLink(inform.getLinkIndex().get(currentCompareDoc));
 					lsaValue.getResult().add(data);
-				//}
+				}
 				if(count==inform.getSentenceIndex().get(currentCompareDoc).size()-1) {
 					currentCompareDoc++;
 					count=0;
@@ -59,10 +60,11 @@ public class CopyCheck {
 			for(int j=originalDocSentence ; j < vector.size() ; j++) {
 				double rate = vector.get(i).cosineSimilarityTo(vector.get(j), true);
 				//표절의심문서에 저장
-				if(rate>0) {
+				if(rate>0.7) {
 					SuspendPlagiarismResultItemData data = new SuspendPlagiarismResultItemData(i,currentCompareDoc,count,rate);
 					data.setPartOfOriginalDocSentence(inform.getSentenceIndex().get(0).get(i));
 					data.setCompareDocSentence(inform.getSentenceIndex().get(currentCompareDoc).get(count));
+					data.setCompareDocLink(inform.getLinkIndex().get(currentCompareDoc));
 					lsaValue.getResult().add(data);
 				}
 				

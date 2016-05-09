@@ -6,6 +6,7 @@ public class BookReportItemData {
 
 	private ArrayList<ArrayList<Word>> noun = new ArrayList<ArrayList<Word>>();
 	private ArrayList<String> sentence = new ArrayList<String>();
+	private ArrayList<ArrayList<String>> separateWord = new ArrayList<ArrayList<String>>();
 	private String link;
 	private String title;
 	private String content;
@@ -49,6 +50,12 @@ public class BookReportItemData {
 	}
 	public void setSentence(ArrayList<String> sentence) {
 		this.sentence = sentence;
+	}
+	public ArrayList<ArrayList<String>> getSeparateWord() {
+		return separateWord;
+	}
+	public void setSeparateWord(ArrayList<ArrayList<String>> separateWord) {
+		this.separateWord = separateWord;
 	}
 	public String getLink() {
 		return link;
