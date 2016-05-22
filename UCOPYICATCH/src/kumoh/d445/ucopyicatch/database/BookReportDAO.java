@@ -11,6 +11,7 @@ import java.util.Set;
 import kumoh.d445.ucopyicatch.analysis.TFIDF;
 import kumoh.d445.ucopyicatch.bookreport.BookReportData;
 import kumoh.d445.ucopyicatch.bookreport.BookReportItemData;
+import kumoh.d445.ucopyicatch.bookreport.Tag;
 import kumoh.d445.ucopyicatch.bookreport.Word;
 
 import java.util.Map.Entry;
@@ -18,7 +19,7 @@ import java.util.Map.Entry;
 
 public class BookReportDAO {
 	private static final String JDBC_DRIVER = "org.gjt.mm.mysql.Driver";
-	private static final String JDBC_URL = "jdbc:mysql://202.31.202.199:3306/ucopyicatch";
+	private static final String JDBC_URL = "jdbc:mysql://202.31.202.199:3306/ucopyicatch6";
 	private static final String USER = "root";
 	private static final String PASSWD = "kle445";
 	
@@ -108,12 +109,86 @@ public class BookReportDAO {
 
 	}
 	
+	public BookReportData getSeparate(int code) {
+		connect();
+		BookReportData data = new BookReportData();
+		Statement stmt = null;
+		try {
+			String bookSql = "select * from book where code='"+code+"' order by bookid asc;";
+			stmt = con.createStatement();
+			ResultSet BookRs = stmt.executeQuery(bookSql);
+			while(BookRs.next()) {
+				BookReportItemData item = setSeparate(BookRs);
+				data.getItems().add(item);
+			}
+			BookRs.close();
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			disconnect();
+		}
+		return data;
+	}
+	
+	public BookReportItemData setSeparate(ResultSet rs) {
+		BookReportItemData item = new BookReportItemData();
+		Statement stmt = null;
+		try {
+			int bookid = rs.getInt("bookid");
+			int bookCode = rs.getInt("code");
+			String title = rs.getString("title");
+			String link = rs.getString("link");
+			String text = rs.getString("text");
+			//sentence 다시 검색
+			String sentenceSql = "select sentenceid,sentence from booksentence where bookid='"+bookid+"' order by sentenceid asc;";
+			
+			stmt = con.createStatement();
+			ResultSet sentenceRs = stmt.executeQuery(sentenceSql);
+			ArrayList<Integer> temp = new ArrayList<Integer>();
+			while(sentenceRs.next()) {
+				item.setBookcode(bookCode);
+				item.setTitle(title);
+				item.setContent(text);
+				item.setLink(link);
+				item.getSentence().add(sentenceRs.getString("sentence"));
+				temp.add(sentenceRs.getInt("sentenceid"));
+			}
+			sentenceRs.close();
+			for(int i =0 ; i < temp.size() ; i++) {
+				String joinSql = "select sentenceid, separate from separate where sentenceid='"+temp.get(i)+"';";
+				ResultSet joinRs = stmt.executeQuery(joinSql);
+				ArrayList<String> list = new ArrayList<String>();
+				while(joinRs.next()) {
+					list.add(joinRs.getString("separate"));
+				}
+				item.getSeparateWord().add(list);
+				joinRs.close();
+			}
+			for(int i =0 ; i < temp.size() ; i++) {
+				String joinSql = "select * from tag where sentenceid='"+temp.get(i)+"';";
+				ResultSet joinRs = stmt.executeQuery(joinSql);
+				ArrayList<Tag> tlist = new ArrayList<Tag>();
+				while(joinRs.next()) {
+					tlist.add(new Tag(joinRs.getString("tagName"),joinRs.getInt("tagCnt")));
+				}
+				item.getTagWord().add(tlist);
+				joinRs.close();
+			}
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return item;
+		
+	}
+	
 	public BookReportData getBook(int code) {
 		connect();
 		BookReportData data = new BookReportData();
 		Statement stmt = null;
 		try {
-			String bookSql = "select * from book where code='"+code+"';";
+			String bookSql = "select * from book where code='"+code+"' order by bookid asc;";
 			stmt = con.createStatement();
 			ResultSet BookRs = stmt.executeQuery(bookSql);
 			while(BookRs.next()) {
@@ -130,79 +205,6 @@ public class BookReportDAO {
 		return data;
 	}
 	
-	//테스트용으로 지울것
-	public BookReportData getSeperate(int code) {
-		connect();
-		BookReportData data = new BookReportData();
-		Statement stmt = null;
-		try {
-			String bookSql = "select * from book where code='"+code+"';";
-			stmt = con.createStatement();
-			ResultSet BookRs = stmt.executeQuery(bookSql);
-			while(BookRs.next()) {
-				BookReportItemData item = setSeperate(BookRs);
-				data.getItems().add(item);
-			}
-			BookRs.close();
-			stmt.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			disconnect();
-		}
-		return data;
-	}
-	
-	//테스트용으로 지울것
-	private BookReportItemData setSeperate(ResultSet rs) {
-		BookReportItemData item = new BookReportItemData();
-		Statement stmt = null;
-		try {
-			int bookid = rs.getInt("bookid");
-			int bookCode = rs.getInt("code");
-			String title = rs.getString("title");
-			String link = rs.getString("link");
-			String text = rs.getString("text");
-			//sentence 다시 검색
-			String sentenceSql = "select sentence from booksentence where bookid='"+bookid+"';";
-			
-			//booksentence 와 booknountf 조인
-			String joinSql = "select sentenceid, separate, tf from separate where bookid='"+bookid+"';";
-			
-			stmt = con.createStatement();
-			ResultSet sentenceRs = stmt.executeQuery(sentenceSql);
-			
-			while(sentenceRs.next()) {
-				item.setBookcode(bookCode);
-				item.setTitle(title);
-				item.setContent(text);
-				item.setLink(link);
-				item.getSentence().add(sentenceRs.getString("sentence"));
-			}
-			sentenceRs.close();
-			ResultSet joinRs = stmt.executeQuery(joinSql);
-			while(joinRs.next()) {
-				ArrayList<Word> wlist = new ArrayList<Word>();
-				wlist.add(new Word(joinRs.getString("separate"),joinRs.getInt("tf")));
-				int preid = joinRs.getInt("sentenceid");
-				while(joinRs.next()) {
-					int id = joinRs.getInt("sentenceid");
-					wlist.add(new Word(joinRs.getString("separate"),joinRs.getInt("tf")));
-					if(preid != id) {
-						break;
-					}
-					preid = id;
-				}
-				item.getContents().add(wlist);
-			}
-			joinRs.close();
-			stmt.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return item;
-	}
-	
 	private BookReportItemData setBookReportItemData(ResultSet rs) {
 		BookReportItemData item = new BookReportItemData();
 		Statement stmt = null;
@@ -213,39 +215,42 @@ public class BookReportDAO {
 			String link = rs.getString("link");
 			String text = rs.getString("text");
 			//sentence 다시 검색
-			String sentenceSql = "select sentence from booksentence where bookid='"+bookid+"';";
-			
-			//booksentence 와 booknountf 조인
-			String joinSql = "select sentenceid, noun, nountf from booknountf where bookid='"+bookid+"';";
+			String sentenceSql = "select sentenceid,sentence from booksentence where bookid='"+bookid+"' order by sentenceid asc;";
 			
 			stmt = con.createStatement();
 			ResultSet sentenceRs = stmt.executeQuery(sentenceSql);
-			
+			ArrayList<Integer> temp = new ArrayList<Integer>();
 			while(sentenceRs.next()) {
 				item.setBookcode(bookCode);
 				item.setTitle(title);
 				item.setContent(text);
 				item.setLink(link);
 				item.getSentence().add(sentenceRs.getString("sentence"));
+				temp.add(sentenceRs.getInt("sentenceid"));
 			}
 			sentenceRs.close();
-			ResultSet joinRs = stmt.executeQuery(joinSql);
-			while(joinRs.next()) {
+			for(int i =0 ; i < temp.size() ; i++) {
+				String joinSql = "select sentenceid, nounid, noun, nountf from booknountf where sentenceid='"+temp.get(i)+"';";
+				ResultSet joinRs = stmt.executeQuery(joinSql);
 				ArrayList<Word> wlist = new ArrayList<Word>();
-				wlist.add(new Word(joinRs.getString("noun"),joinRs.getInt("nountf")));
-				int preid = joinRs.getInt("sentenceid");
 				while(joinRs.next()) {
-					int id = joinRs.getInt("sentenceid");
 					wlist.add(new Word(joinRs.getString("noun"),joinRs.getInt("nountf")));
-					if(preid != id) {
-						break;
-					}
-					preid = id;
+					//System.out.println(joinRs.getString("noun"));
 				}
+				//System.out.println(item.getSentence().get(i));
 				item.getContents().add(wlist);
-				//item.getContents().add(setWord(sentenceRs,bookCode));
+				joinRs.close();
 			}
-			joinRs.close();
+			for(int i =0 ; i < temp.size() ; i++) {
+				String joinSql = "select * from tag where sentenceid='"+temp.get(i)+"';";
+				ResultSet joinRs = stmt.executeQuery(joinSql);
+				ArrayList<Tag> tlist = new ArrayList<Tag>();
+				while(joinRs.next()) {
+					tlist.add(new Tag(joinRs.getString("tagName"),joinRs.getInt("tagCnt")));
+				}
+				item.getTagWord().add(tlist);
+				joinRs.close();
+			}
 			stmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();

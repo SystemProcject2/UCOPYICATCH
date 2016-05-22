@@ -15,12 +15,7 @@ public class BookReportData {
 				for(int k=0 ; k < items.get(i).getContents().get(j).size() ; k++) {
 					String name = items.get(i).getContents().get(j).get(k).getName();
 					int count = dfList.get(name);
-					if(i==0) {
-						items.get(i).getContents().get(j).get(k).setDF(count);
-					}
-					else {
-						items.get(i).getContents().get(j).get(k).setDF(++count);
-					}
+					items.get(i).getContents().get(j).get(k).setDF(count);
 					items.get(i).getContents().get(j).get(k).setTotal(items.size());
 				}
 			}
@@ -55,7 +50,6 @@ public class BookReportData {
 		for(int i=0 ; i < items.size() ; i++) {
 			for(int j=0 ; j < items.get(i).getContents().size() ; j++) {
 				for(int k=0 ; k < items.get(i).getContents().get(j).size() ; k++) {
-					int tf = items.get(i).getContents().get(j).get(k).getTF();
 					items.get(i).getContents().get(j).get(k).setTfidf(1);
 				}
 			}

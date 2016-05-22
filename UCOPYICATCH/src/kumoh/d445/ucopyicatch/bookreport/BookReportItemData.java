@@ -7,6 +7,7 @@ public class BookReportItemData {
 	private ArrayList<ArrayList<Word>> noun = new ArrayList<ArrayList<Word>>();
 	private ArrayList<String> sentence = new ArrayList<String>();
 	private ArrayList<ArrayList<String>> separateWord = new ArrayList<ArrayList<String>>();
+	private ArrayList<ArrayList<Tag>> tagWord = new ArrayList<ArrayList<Tag>>();
 	private String link;
 	private String title;
 	private String content;
@@ -69,7 +70,12 @@ public class BookReportItemData {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-
+	public ArrayList<ArrayList<Tag>> getTagWord() {
+		return tagWord;
+	}
+	public void setTageWord(ArrayList<ArrayList<Tag>> tagWord) {
+		this.tagWord = tagWord;
+	}
 	@Override
 	public String toString() {
 		return "BookReportItemData [link=" + link + ", title=" + title + ", content=" + content + ", bookcode="

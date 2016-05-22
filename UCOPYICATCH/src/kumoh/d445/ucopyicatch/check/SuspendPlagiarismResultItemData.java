@@ -8,12 +8,20 @@ public class SuspendPlagiarismResultItemData {
 	private String compareDocSentence;
 	private String compareDocLink;
 	private double plagiarismRate;	//해당 문장의 검사 결과값
+	private double edRate;	//문장의 편집거리 비율 공식 = (전체 문자 - 편집거리) / (전체문자)
+	private double tagRate;
+	private double endResult;	//최종 결과
 	
-	public SuspendPlagiarismResultItemData(int partOfOriginalDocIndex,int compareDoc,int compareDocSentenceIndex,double plagiarismRate) {
+	public SuspendPlagiarismResultItemData(int partOfOriginalDocIndex,String partOfOriginalDocSentence,int compareDoc,int compareDocSentenceIndex,String compareDocSentence,String compareDocLink,double plagiarismRate,double tagRate) {
 		this.partOfOriginalDocIndex = partOfOriginalDocIndex;
+		this.partOfOriginalDocSentence = partOfOriginalDocSentence;
 		this.compareDoc = compareDoc;
 		this.compareDocSentenceIndex = compareDocSentenceIndex;
+		this.compareDocSentence = compareDocSentence;
+		this.compareDocLink = compareDocLink;
 		this.plagiarismRate = plagiarismRate;
+		this.tagRate = tagRate;
+		edRate = CopyCheck.calcEditDistance(partOfOriginalDocSentence, compareDocSentence);
 	}
 
 	public int getPartOfOriginalDocIndex() {
@@ -71,12 +79,53 @@ public class SuspendPlagiarismResultItemData {
 	public void setCompareDocLink(String compareDocLink) {
 		this.compareDocLink = compareDocLink;
 	}
+	
+	
+
+	public double getEdRate() {
+		return edRate;
+	}
+
+	public void setEdRate(double edRate) {
+		this.edRate = edRate;
+	}
+
+	public double getEndResult() {
+		return endResult;
+	}
+
+	public void setEndResult(double cosineRating, double editRating) {
+		this.endResult = plagiarismRate*cosineRating + edRate*editRating;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + partOfOriginalDocIndex;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SuspendPlagiarismResultItemData other = (SuspendPlagiarismResultItemData) obj;
+		if (partOfOriginalDocIndex != other.partOfOriginalDocIndex)
+			return false;
+		return true;
+	}
 
 	@Override
 	public String toString() {
 		return "Data [검사문장번호=" + partOfOriginalDocIndex
 				+ ", 검사문장=" + partOfOriginalDocSentence + ", 비교문서번호=" + compareDoc
 				+ ", 비교문서 문장번호=" + compareDocSentenceIndex + ", 비교문서 문장=" + compareDocSentence
-				+ ", 비교문서 주소=" + compareDocLink + ", Rate=" + plagiarismRate + "]";
+				+ ", 비교문서 주소=" + compareDocLink + ", CosineRate=" + plagiarismRate
+				+ ", tagRate=" + tagRate + ", editRate=" + edRate + ", endResult=" + endResult + "]";
 	}
 }

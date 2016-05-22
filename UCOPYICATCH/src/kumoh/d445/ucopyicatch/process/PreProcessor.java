@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 import kumoh.d445.ucopyicatch.analysis.KoreanAnalysis;
 import kumoh.d445.ucopyicatch.bookreport.BookReportData;
 import kumoh.d445.ucopyicatch.bookreport.BookReportItemData;
-import kumoh.d445.ucopyicatch.database.BookReportDAOCopy;
 import kumoh.d445.ucopyicatch.daumdataminig.book.BookFile;
 import kumoh.d445.ucopyicatch.daumdataminig.xml.XMLReader;
 
@@ -17,7 +16,6 @@ public class PreProcessor {
 		//2. 문장분석
 		//3. 디비 저장
 		KoreanAnalysis ka = new KoreanAnalysis();
-	      BookReportDAOCopy dao = new BookReportDAOCopy();
 	      BookFile bf = new BookFile();
 	      XMLReader reader = new XMLReader();
 	      
@@ -33,7 +31,7 @@ public class PreProcessor {
 	     //    Map.Entry<String, Integer> e = (Map.Entry<String, Integer>)it.next();
 	        
 	      	data = reader.readXML(10001,"백범일지");
-	         dao.insertBook(data.get(0).getBookcode(), data.get(0).getTitle(), data.get(0).getLink(), data.get(0).getContent());
+//	         dao.insertBook(data.get(0).getBookcode(), data.get(0).getTitle(), data.get(0).getLink(), data.get(0).getContent());
 	   //      ArrayList<Book> bookList = dao.selectBook(e.getValue());
 	         
 	   //      BookReportData brd = ka.divideBookReport(e.getKey(), e.getValue());
