@@ -1,0 +1,50 @@
+@CHARSET "EUC-KR";@CHARSET "EUC-KR";
+*::selection:not(p) {
+  background: transparent;
+}
+
+html, body {
+  background: #EEE;
+}
+
+.test {
+  background: #ffc0cb;
+}
+
+.container {
+  background: #fff;
+  position: relative;
+  width: 96%;
+  max-width: 700px;
+  min-width: 700px;
+  margin: 30px auto auto;
+  padding: 0 2%;
+  border: 1px solid #CCC;
+  min-height: 400px;
+}
+
+p {
+	font-family: "Times New Roman", Times, serif;
+	font-style: oblique;
+	font-size: 30px;
+	font-weight: bold;
+	font-variant: small-caps;
+	
+}
+
+body {
+    font-size: 100%;
+}
+
+input  {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
